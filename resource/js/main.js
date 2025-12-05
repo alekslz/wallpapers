@@ -113,7 +113,7 @@ function dispay() { // displaying image in full size
 function like(img) {  // call ajax and insert in db files like
 	$.ajax({
 		type: "POST",
-		url: "resource/function/data.php",
+		url: "/api/like",
 		data: {"like": img}
 
 	});
@@ -122,7 +122,7 @@ function like(img) {  // call ajax and insert in db files like
 function dislike(img) { // call ajax and insert in db files dislike
 	$.ajax({
 		type: "POST",
-		url: "resource/function/data.php",
+		url: "/api/dislike",
 		data: {"dislike": img}
 
 	});
@@ -217,7 +217,7 @@ function download() { // preparing picutere for download and dowloading images
 		var http = new XMLHttpRequest();
 		
 
-		http.open("POST", "resource/function/check.php", true);
+		http.open("POST", "/api/download", true);
 		http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		http.responseType = 'blob';
 

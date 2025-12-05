@@ -1,3 +1,10 @@
 download/
 resource/images/
 resource/imagesmall/
+data/
+wallpapers
+init_data
+*.exe
+*.dll
+*.so
+*.dylib
