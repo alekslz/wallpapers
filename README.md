@@ -50,20 +50,31 @@ wallpapers/
    ```
    This scans the `resource/images/` directory and creates `data/images.json`
 
-2. **Run the application**:
+   **Note:** `init_data.go` is a separate utility program. Do NOT run it together with main.go.
+
+2. **Run the web server**:
    ```bash
    go run main.go models.go
    ```
 
+   **Important:** You must include both `main.go` and `models.go` when running the server.
+
 3. **Access the application**:
    Open your browser to `http://localhost:8080`
 
-### Building a Binary
+### Building Binaries
 
-To create a standalone executable:
+To create standalone executables:
 ```bash
+# Build the data initializer
+go build -o init_data init_data.go
+
+# Build the web server
 go build -o wallpapers main.go models.go
-./wallpapers
+
+# Run them:
+./init_data      # Initialize/update the JSON database
+./wallpapers     # Start the web server
 ```
 
 ## API Endpoints
