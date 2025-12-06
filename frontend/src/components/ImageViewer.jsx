@@ -57,10 +57,16 @@ const ImageViewer = ({ image, onClose, isSelected, onToggleSelection }) => {
               checked={isSelected}
               onChange={onToggleSelection}
             />
-            <span>P.F.D</span>
+            <span>Select</span>
           </label>
-          <button onClick={handleLike} className="like-btn">Like</button>
-          <button onClick={handleDislike} className="dislike-btn">Dislike</button>
+          <button onClick={handleLike} className="like-btn">
+            <span>❤️</span>
+            <span>Love</span>
+          </button>
+          <button onClick={handleDislike} className="dislike-btn">
+            <span>👎</span>
+            <span>Pass</span>
+          </button>
         </div>
       </div>
     </div>
