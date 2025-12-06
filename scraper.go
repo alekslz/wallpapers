@@ -63,8 +63,8 @@ func scrapeImageURLs() []string {
 // scrapeThreadURLs gets all thread URLs from the first N pages of /wg/
 func scrapeThreadURLs() []string {
 	var threadURLs []string
-	// Updated regex to match various thread link formats
-	threadRegex := regexp.MustCompile(`(?:href="|')(/wg/thread/\d+)(?:"|')`)
+	// Match relative thread URLs like: href="thread/8115665#p8115665" or href="thread/8115665/title"
+	threadRegex := regexp.MustCompile(`href="thread/(\d+)`)
 
 	pages := []string{""}
 	for i := 2; i <= maxPages; i++ {
@@ -86,18 +86,15 @@ func scrapeThreadURLs() []string {
 		matches := threadRegex.FindAllStringSubmatch(html, -1)
 		log.Printf("Found %d thread matches on this page\n", len(matches))
 
+		seen := make(map[string]bool)
 		for _, match := range matches {
 			if len(match) > 1 {
-				threadURL := "https://boards.4chan.org" + match[1]
+				threadID := match[1]
+				threadURL := "https://boards.4chan.org/wg/thread/" + threadID
+
 				// Avoid duplicates
-				duplicate := false
-				for _, existing := range threadURLs {
-					if existing == threadURL {
-						duplicate = true
-						break
-					}
-				}
-				if !duplicate {
+				if !seen[threadURL] {
+					seen[threadURL] = true
 					threadURLs = append(threadURLs, threadURL)
 					log.Printf("  Added thread: %s\n", threadURL)
 				}
