@@ -16,6 +16,7 @@ This application has been migrated from PHP/MySQL to Go with JSON storage.
 - Select multiple images and download as ZIP
 - Full-size image viewer with keyboard navigation
 - Thumbnail previews
+- **4chan wallpaper scraper** (re-implemented in Go)
 
 ## Directory Structure
 
@@ -24,6 +25,8 @@ wallpapers/
 ├── main.go                    # Main HTTP server and API handlers
 ├── models.go                  # Data models and JSON storage operations
 ├── init_data.go              # Utility to initialize JSON data from images
+├── scraper.go                # Utility to download wallpapers from 4chan /wg/
+├── create_thumbnails.go      # Utility to generate thumbnail images
 ├── data/
 │   └── images.json           # JSON database file
 ├── resource/
@@ -36,6 +39,26 @@ wallpapers/
 └── index.html               # Main HTML page
 ```
 
+## Utilities
+
+The application includes several utility programs:
+
+1. **scraper.go** - Downloads wallpapers from 4chan.org/wg/
+   - Scrapes the first 10 pages of the board
+   - Downloads up to 15 threads worth of images
+   - Skips images that already exist
+   - Rate-limited to be respectful to 4chan's servers
+
+2. **create_thumbnails.go** - Generates thumbnail images
+   - Creates 300x300 max thumbnails maintaining aspect ratio
+   - High-quality CatmullRom scaling
+   - Skips thumbnails that already exist
+
+3. **init_data.go** - Initializes the JSON database
+   - Scans `resource/images/` directory
+   - Creates metadata for each image in `data/images.json`
+   - Sets initial like/dislike counts to 0
+
 ## Installation & Setup
 
 ### Prerequisites
@@ -44,37 +67,69 @@ wallpapers/
 
 ### Steps
 
-1. **Initialize data from existing images**:
+#### Option A: Download Wallpapers from 4chan
+
+1. **Scrape and download wallpapers from 4chan /wg/**:
+   ```bash
+   go run scraper.go
+   ```
+   This will download wallpapers from the first 10 pages of 4chan.org/wg/ to `resource/images/`
+
+2. **Create thumbnails**:
+   ```bash
+   go run create_thumbnails.go
+   ```
+   This creates smaller preview images in `resource/imagesmall/`
+
+3. **Initialize the JSON database**:
    ```bash
    go run init_data.go
    ```
    This scans the `resource/images/` directory and creates `data/images.json`
 
-   **Note:** `init_data.go` is a separate utility program. Do NOT run it together with main.go.
+4. **Run the web server**:
+   ```bash
+   go run main.go models.go
+   ```
 
-2. **Run the web server**:
+5. **Access the application**:
+   Open your browser to `http://localhost:8080`
+
+#### Option B: Use Existing Images
+
+1. **Add your images** to `resource/images/` and `resource/imagesmall/` directories
+
+2. **Initialize data from existing images**:
+   ```bash
+   go run init_data.go
+   ```
+   This scans the `resource/images/` directory and creates `data/images.json`
+
+3. **Run the web server**:
    ```bash
    go run main.go models.go
    ```
 
    **Important:** You must include both `main.go` and `models.go` when running the server.
 
-3. **Access the application**:
+4. **Access the application**:
    Open your browser to `http://localhost:8080`
 
 ### Building Binaries
 
 To create standalone executables:
 ```bash
-# Build the data initializer
+# Build all utilities
+go build -o scraper scraper.go
+go build -o create_thumbnails create_thumbnails.go
 go build -o init_data init_data.go
-
-# Build the web server
 go build -o wallpapers main.go models.go
 
-# Run them:
-./init_data      # Initialize/update the JSON database
-./wallpapers     # Start the web server
+# Run them in order:
+./scraper            # Download wallpapers from 4chan
+./create_thumbnails  # Create thumbnail images
+./init_data          # Initialize/update the JSON database
+./wallpapers         # Start the web server
 ```
 
 ## API Endpoints

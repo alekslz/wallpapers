@@ -4,6 +4,8 @@ resource/imagesmall/
 data/
 wallpapers
 init_data
+scraper
+create_thumbnails
 *.exe
 *.dll
 *.so
