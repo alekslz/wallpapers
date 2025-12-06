@@ -120,7 +120,14 @@ function imageDel() {
 
 function insertDb($dbh) {
 	$folder 	= "../images/";
-	$files 		= array_slice(scandir($folder), 2);
+
+	// Check if folder exists
+	if (!file_exists($folder)) {
+		mkdir($folder, 0777, true);
+	}
+
+	// Get image files from the folder
+	$imageFiles = array_slice(scandir($folder), 2);
 
 	$stmt = $dbh->prepare("CREATE TABLE IF NOT EXISTS files
 			(id INT ( 11 ) AUTO_INCREMENT PRIMARY KEY,
@@ -130,9 +137,12 @@ function insertDb($dbh) {
 			liked INT ( 1 ) NOT NULL)");
 	$stmt->execute();
 
-	$stmt = $dbh->prepare("INSERT INTO files (name) VALUE (:name)");
-	foreach($files as $file) {
-    	$stmt->execute(array(':name' => $file));
+	// Only insert if there are files to process
+	if (!empty($imageFiles)) {
+		$stmt = $dbh->prepare("INSERT INTO files (name) VALUE (:name)");
+		foreach($imageFiles as $file) {
+			$stmt->execute(array(':name' => $file));
+		}
 	}
 }
 
