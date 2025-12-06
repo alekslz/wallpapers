@@ -63,16 +63,17 @@ func scrapeImageURLs() []string {
 // scrapeThreadURLs gets all thread URLs from the first N pages of /wg/
 func scrapeThreadURLs() []string {
 	var threadURLs []string
-	threadRegex := regexp.MustCompile(`href="(/wg/thread/\d+)"`)
+	// Updated regex to match various thread link formats
+	threadRegex := regexp.MustCompile(`(?:href="|')(/wg/thread/\d+)(?:"|')`)
 
 	pages := []string{""}
 	for i := 2; i <= maxPages; i++ {
 		pages = append(pages, fmt.Sprintf("%d", i))
 	}
 
-	for _, page := range pages {
+	for idx, page := range pages {
 		url := baseURL + page
-		log.Printf("Fetching page: %s\n", url)
+		log.Printf("Fetching page %d/%d: %s\n", idx+1, len(pages), url)
 
 		html, err := fetchURL(url)
 		if err != nil {
@@ -80,11 +81,26 @@ func scrapeThreadURLs() []string {
 			continue
 		}
 
+		log.Printf("Page HTML length: %d bytes\n", len(html))
+
 		matches := threadRegex.FindAllStringSubmatch(html, -1)
+		log.Printf("Found %d thread matches on this page\n", len(matches))
+
 		for _, match := range matches {
 			if len(match) > 1 {
 				threadURL := "https://boards.4chan.org" + match[1]
-				threadURLs = append(threadURLs, threadURL)
+				// Avoid duplicates
+				duplicate := false
+				for _, existing := range threadURLs {
+					if existing == threadURL {
+						duplicate = true
+						break
+					}
+				}
+				if !duplicate {
+					threadURLs = append(threadURLs, threadURL)
+					log.Printf("  Added thread: %s\n", threadURL)
+				}
 			}
 		}
 
@@ -105,15 +121,30 @@ func scrapeImagesFromThread(threadURL string) []string {
 		return imageURLs
 	}
 
-	// Match image URLs from 4cdn.org
+	log.Printf("Thread HTML length: %d bytes\n", len(html))
+
+	// Match image URLs from 4cdn.org (both thumbnails and full images)
 	// Pattern matches: //i.4cdn.org/wg/1234567890.jpg or .png
-	imageRegex := regexp.MustCompile(`//i\.4cdn\.org/wg/\d+\.(jpg|png|gif)`)
+	imageRegex := regexp.MustCompile(`//i\.4cdn\.org/wg/\d+\.(jpg|png|gif|webm)`)
 	matches := imageRegex.FindAllString(html, -1)
 
+	log.Printf("Found %d image matches in thread\n", len(matches))
+
+	seen := make(map[string]bool)
 	for _, match := range matches {
 		imageURL := "https:" + match
-		imageURLs = append(imageURLs, imageURL)
+		// Remove 's' suffix for thumbnails to get full image
+		imageURL = strings.ReplaceAll(imageURL, "s.jpg", ".jpg")
+		imageURL = strings.ReplaceAll(imageURL, "s.png", ".png")
+
+		// Avoid duplicates
+		if !seen[imageURL] {
+			seen[imageURL] = true
+			imageURLs = append(imageURLs, imageURL)
+		}
 	}
+
+	log.Printf("Extracted %d unique image URLs\n", len(imageURLs))
 
 	return imageURLs
 }
@@ -124,7 +155,15 @@ func fetchURL(url string) (string, error) {
 		Timeout: 30 * time.Second,
 	}
 
-	resp, err := client.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	// Add user agent to avoid being blocked
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
