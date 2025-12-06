@@ -8,6 +8,14 @@ import (
 	"path/filepath"
 )
 
+// ImageFile represents a wallpaper image with metadata
+type ImageFile struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Liked    int    `json:"liked"`
+	Disliked int    `json:"disliked"`
+}
+
 // InitData scans the images directory and creates a JSON file with all image metadata
 func InitData() {
 	imagesDir := "resource/images"
