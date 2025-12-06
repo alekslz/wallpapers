@@ -1,16 +1,21 @@
-# Wallpaper Gallery - Go Edition
+# Wallpaper Gallery - Modern Stack
 
-This application has been migrated from PHP/MySQL to Go with JSON storage.
+A modern wallpaper gallery application with Go backend and React frontend.
 
-## Changes from PHP Version
+## Tech Stack
 
 ### Backend
-- **Language**: PHP → Go
-- **Database**: MySQL → JSON file (`data/images.json`)
-- **Server**: Apache/Nginx → Built-in Go HTTP server
-- **Port**: Runs on `http://localhost:8080` by default
+- **Language**: Go
+- **Database**: JSON file (`data/images.json`)
+- **Server**: Built-in Go HTTP server
+- **Port**: `http://localhost:8080`
 
-### Features Retained
+### Frontend
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Styling**: CSS Modules
+
+### Features
 - Image gallery with infinite scroll pagination
 - Like/Dislike functionality for images
 - Select multiple images and download as ZIP
@@ -27,16 +32,20 @@ wallpapers/
 ├── init_data.go              # Utility to initialize JSON data from images
 ├── scraper.go                # Utility to download wallpapers from 4chan /wg/
 ├── create_thumbnails.go      # Utility to generate thumbnail images
+├── frontend/                 # React frontend (Vite)
+│   ├── src/
+│   │   ├── components/       # React components
+│   │   ├── App.jsx          # Main app component
+│   │   └── main.jsx         # Entry point
+│   ├── package.json
+│   └── vite.config.js
+├── dist/                     # Built frontend (generated)
 ├── data/
 │   └── images.json           # JSON database file
 ├── resource/
 │   ├── images/               # Full-size images
-│   ├── imagesmall/           # Thumbnail images
-│   ├── css/                  # Stylesheets
-│   ├── js/                   # JavaScript files (updated for Go API)
-│   └── icons/                # UI icons
-├── download/                 # Temporary ZIP files
-└── index.html               # Main HTML page
+│   └── imagesmall/           # Thumbnail images
+└── download/                 # Temporary ZIP files
 ```
 
 ## Utilities
@@ -63,57 +72,85 @@ The application includes several utility programs:
 
 ### Prerequisites
 - Go 1.16 or higher
-- Image files in `resource/images/` and `resource/imagesmall/` directories
+- Node.js 16 or higher
+- npm or yarn
 
-### Steps
+### Quick Start
 
 #### Option A: Download Wallpapers from 4chan
 
-1. **Scrape and download wallpapers from 4chan /wg/**:
+1. **Scrape and download wallpapers**:
    ```bash
    go run scraper.go
    ```
-   This will download wallpapers from the first 10 pages of 4chan.org/wg/ to `resource/images/`
 
 2. **Create thumbnails**:
    ```bash
    go run create_thumbnails.go
    ```
-   This creates smaller preview images in `resource/imagesmall/`
 
-3. **Initialize the JSON database**:
+3. **Initialize the database**:
    ```bash
    go run init_data.go
    ```
-   This scans the `resource/images/` directory and creates `data/images.json`
 
-4. **Run the web server**:
+4. **Build the frontend**:
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   cd ..
+   ```
+
+5. **Start the server**:
    ```bash
    go run main.go models.go
    ```
 
-5. **Access the application**:
-   Open your browser to `http://localhost:8080`
+6. **Access the app**: http://localhost:8080
 
 #### Option B: Use Existing Images
 
-1. **Add your images** to `resource/images/` and `resource/imagesmall/` directories
+1. **Add images** to `resource/images/` and `resource/imagesmall/`
 
-2. **Initialize data from existing images**:
+2. **Initialize the database**:
    ```bash
    go run init_data.go
    ```
-   This scans the `resource/images/` directory and creates `data/images.json`
 
-3. **Run the web server**:
+3. **Build the frontend**:
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   cd ..
+   ```
+
+4. **Start the server**:
    ```bash
    go run main.go models.go
    ```
 
-   **Important:** You must include both `main.go` and `models.go` when running the server.
+5. **Access the app**: http://localhost:8080
 
-4. **Access the application**:
-   Open your browser to `http://localhost:8080`
+### Development Mode
+
+For development with hot module replacement:
+
+1. **Start the Go backend**:
+   ```bash
+   go run main.go models.go
+   ```
+
+2. **In a new terminal, start the Vite dev server**:
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+3. **Access the development server**: http://localhost:5173
+
+The Vite dev server will proxy API requests to the Go backend at :8080.
 
 ### Building Binaries
 

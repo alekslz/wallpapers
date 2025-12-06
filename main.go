@@ -37,8 +37,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Set up routes
-	http.HandleFunc("/", serveIndex)
+	// Set up API routes
 	http.HandleFunc("/api/count", handleCount)
 	http.HandleFunc("/api/images", handleImages)
 	http.HandleFunc("/api/like", handleLike)
@@ -49,6 +48,9 @@ func main() {
 	http.Handle("/resource/", http.StripPrefix("/resource/", http.FileServer(http.Dir("resource"))))
 	http.Handle("/download/", http.StripPrefix("/download/", http.FileServer(http.Dir("download"))))
 
+	// Serve React app (SPA - all routes serve index.html)
+	http.HandleFunc("/", serveSPA)
+
 	// Start server
 	port := "8080"
 	log.Printf("Server starting on http://localhost:%s\n", port)
@@ -57,13 +59,21 @@ func main() {
 	}
 }
 
-// serveIndex serves the main HTML page
-func serveIndex(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
+// serveSPA serves the React Single Page Application
+func serveSPA(w http.ResponseWriter, r *http.Request) {
+	// Check if file exists in dist directory
+	path := filepath.Join("dist", r.URL.Path)
+
+	// If it's a file (has extension), serve it
+	if filepath.Ext(path) != "" {
+		if _, err := os.Stat(path); err == nil {
+			http.ServeFile(w, r, path)
+			return
+		}
 	}
-	http.ServeFile(w, r, "index.html")
+
+	// Otherwise, serve index.html for client-side routing
+	http.ServeFile(w, r, "dist/index.html")
 }
 
 // handleCount returns the total number of groups for pagination

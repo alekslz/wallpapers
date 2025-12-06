@@ -2,6 +2,7 @@ download/
 resource/images/
 resource/imagesmall/
 data/
+dist/
 wallpapers
 init_data
 scraper
@@ -10,3 +11,4 @@ create_thumbnails
 *.dll
 *.so
 *.dylib
+node_modules/

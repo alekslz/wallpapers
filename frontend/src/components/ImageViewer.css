@@ -1,0 +1,68 @@
+.image-viewer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.image-viewer {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.close-btn {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+  opacity: 0.7;
+}
+
+.full-image {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.viewer-controls {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.viewer-controls .checkbox-label {
+  color: white;
+}
+
+.viewer-controls .like-btn,
+.viewer-controls .dislike-btn {
+  padding: 8px 16px;
+  font-size: 16px;
+}
